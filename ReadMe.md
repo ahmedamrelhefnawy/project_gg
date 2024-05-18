@@ -4,7 +4,7 @@ Project_gg is a 2-Player Python game made using opengl. While it's an incomplete
 
 ## Gameplay
 
-<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWcycHRrcmgxZHNnZjZ1bXhkbmFqbWwwenk4MHRhMjV1dDZscjBwYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HXDHrLjbrw5SzBVg04/giphy.gif" style="border:5px solid black">
+<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWcycHRrcmgxZHNnZjZ1bXhkbmFqbWwwenk4MHRhMjV1dDZscjBwYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HXDHrLjbrw5SzBVg04/giphy.gif">
 
 ## Installation
 
