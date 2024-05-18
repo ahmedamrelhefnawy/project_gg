@@ -25,7 +25,7 @@ class entity:
         ## Entity transformation ##
         # movement will be passed from update
         self.speed= tuple(speed)      # initial speed property
-        self.velocity= [speed[0], 0] # interactive speed
+        self.velocity= [0, 0] # interactive speed
 
         self.collisions= {'up': False,
                            'down': False,
@@ -83,8 +83,7 @@ class player(entity):
         self.update_mov_amount(direction)
         
         # resetting collisions every movement
-        self.collisions= {'up': False, 'down': False, 'right': False, 'left': False}        
-
+        self.collisions= {'up': False, 'down': False, 'right': False, 'left': False}
         
         ## Check Collisions ##
         
@@ -98,19 +97,21 @@ class player(entity):
                 
                 # From Right
                 if self.mov_amount[0] > 0:
+                    self.velocity[0]= 0
+                    entity_rect.right= rect.left
+                    
                     # Edit Flags
                     self.collisions['right']= True
                     self.flags['friction']= True
                     
-                    entity_rect.right= rect.left
-                    
                 # From Left
                 if self.mov_amount[0] < 0:
+                    self.velocity[0]= 0
+                    entity_rect.left= rect.right
+                        
                     # Edit Flags
                     self.collisions['left']= True
                     self.flags['friction']= True
-                        
-                    entity_rect.left= rect.right
                     
                 self.pos[0]= entity_rect.x
         
@@ -121,19 +122,22 @@ class player(entity):
         entity_rect= self.rect()
         for rect in map.p_tiles_around(self.pos):
             if entity_rect.colliderect(rect):
-                
                 if self.mov_amount[1] > 0:
+                    
                     # Stop the player
                     self.velocity[1]= 0
+                    entity_rect.top= rect.bottom
                     
                     # Edit Flags
                     self.collisions['up']= True
-                    entity_rect.top= rect.bottom
                     
                     
                 if self.mov_amount[1] < 0:
+                    
                     # Stop the player
                     self.velocity[1]= 0
+                    self.air_time= 0
+                    entity_rect.bottom= rect.top
                     
                     # Edit Flags
                     self.collisions['down']= True
@@ -142,27 +146,29 @@ class player(entity):
                     
                     self.flags['last_wall_jump']['right']= False
                     self.flags['last_wall_jump']['left']= False
-                    self.air_time= 0
-                    entity_rect.bottom= rect.top
                     
                     
                 self.pos[1]= entity_rect.y
         
         if self.velocity[1] < 0 and self.flags['friction']: # Falling and Stick to the wall
-            gravity_effect=  self.gravity / 2
+            gravity_effect= self.gravity / 2
         else:
             gravity_effect= self.gravity
         
         if self.flags['fast_fall']:
-            self.velocity[1]= self.velocity[1] - 0.5
+            self.velocity[1]-= 0.5
             
         self.velocity[1]= max(-10, self.velocity[1] - gravity_effect )
-        
         self.flags['friction']= False
         
-        if self.mov_amount[0] > 0:
+        if self.collisions['right'] or self.collisions['left']: 
+            flip_flag = 1 if self.collisions['right'] else -1
+        else:
+            flip_flag = direction[0]
+        
+        if flip_flag > 0:
             self.flip= False
-        if self.mov_amount[0] < 0:
+        if flip_flag < 0:
             self.flip= True
         
         ### Animations ###
@@ -178,9 +184,9 @@ class player(entity):
         self.gun.flip=self.flip
         
         if not self.flip:
-            self.gun.pos=[self.pos[0]+21,self.pos[1]+15]
+            self.gun.pos=[self.pos[0]+21, self.pos[1]+15]
         else:
-            self.gun.pos=[self.pos[0],self.pos[1]+15]
+            self.gun.pos=[self.pos[0], self.pos[1]+15]
             
         self.gun.bullets.update()
         
@@ -195,22 +201,22 @@ class player(entity):
     def update_mov_amount(self, direction): # Direction is list[int, int]=> between -1,0,1
         
         # In the air or Just wall jumped
-        if not any(self.collisions.values()) or any(self.flags['last_wall_jump'].values()):
+        if not self.collisions['down']:
             
-            air_dive_effect= direction[0]  * self.velocity[0] / 10
+            air_dive_effect= direction[0]  * self.speed[0] / 10
             h_limit= self.speed[0]
             
             if self.mov_amount[0] > 0: # Was moving right
-                self.mov_amount[0]= min(h_limit, self.mov_amount[0] + air_dive_effect )
+                self.mov_amount[0]= min(  h_limit, self.mov_amount[0] + air_dive_effect )
                 
             else:
-                self.mov_amount[0]= max( -h_limit , self.mov_amount[0] + air_dive_effect ) # air_dive_effect is negative
+                self.mov_amount[0]= max( -h_limit, self.mov_amount[0] + air_dive_effect ) # air_dive_effect is negative
 
             
             self.mov_amount[1]= self.velocity[1]
 
         else:
-            self.mov_amount= [direction[0] * self.velocity[0], self.velocity[1]]
+            self.mov_amount= [direction[0] * self.speed[0], self.velocity[1]]
 
     
     
@@ -231,6 +237,7 @@ class player(entity):
                 self.flags['last_wall_jump']['right']= True
                 self.flags['last_wall_jump']['left']= False
                 self.flags['air_jump']= True
+                self.flip = True
                     
             elif self.collisions['left']:
                 self.do_wall_jump_action(1)
@@ -238,6 +245,7 @@ class player(entity):
                 self.flags['last_wall_jump']['left']= True
                 self.flags['last_wall_jump']['right']= False
                 self.flags['air_jump']= True
+                self.flip = False
                     
         
     

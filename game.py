@@ -163,10 +163,12 @@ class Game():
         glClearColor(72/255,160/255,211/255,1.0) # Sky color
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
+        # gluPerspective(100.0, float(self.w) / float(self.h), 0.1, 100.0)
         glOrtho(0, self.w, 0, self.h, -1, 1)
         
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
+        # gluLookAt(0, 0, 15, 0, 0, 0, 0, 1, 0) # try this
 
     def game_timer(self, v):
         self.draw()
@@ -176,16 +178,16 @@ class Game():
         if key == b'\r' and not self.is_alive:
             self.stage=1
         if key == b"q":
-            sys.exit(0)
+            glutLeaveMainLoop()
         
         if self.is_alive:
             if key == b'a':
                 self.movement[0] = True 
             if key == b'd':
                 self.movement[1] = True
-            if key == b'w' and self.is_alive:
+            if key == b'w':
                 self.enemy.jump()
-            if key == b's'and self.is_alive:
+            if key == b's':
                 self.enemy.flags['fast_fall'] = True
                 
             if key == b'4':
@@ -206,14 +208,14 @@ class Game():
             self.movement[0] = False
         if key == b'd':
             self.movement[1] = False
-        if key == b's':
+        if key == b's' and self.is_alive:
             self.enemy.flags['fast_fall'] = False
             
         if key == b'4':
             self.movement[2] = False
         if key == b'6':
             self.movement[3] = False
-        if key == b'5':
+        if key == b'5'and self.is_alive:
             self.player.flags['fast_fall'] = False
         if key == b' ':
             self.enemy.fire=False
@@ -221,5 +223,5 @@ class Game():
             self.player.fire=False
 
 
-g = Game(1280, 720, fullscreen=True)
+g = Game(1280, 720, fullscreen=False)
 
